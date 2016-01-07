@@ -59,13 +59,16 @@ function get_versions_from_json($json_version_string) {
   return($wp_current_versions);
 }
 
+// Get the latest versions from wordpress.org
 $json_version_string = file_get_contents("https://api.wordpress.org/core/version-check/1.7/");
 $wp_current_versions = get_versions_from_json($json_version_string);
 
 if (is_file(VERSION_CACHE_FILE) && filemtime(VERSION_CACHE_FILE) > (time() - (7 * 24 * 60 * 60))) {
+  // Version cache file is current, also get the (previous) versions from there
   $json_version_string = file_get_contents(VERSION_CACHE_FILE);
   $wp_current_versions = array_merge($wp_current_versions, get_versions_from_json($json_version_string));
 } else {
+  // Version cache file is outdated, update it with the current versions from wordpress.org
   if (!is_dir(dirname(VERSION_CACHE_FILE))) mkdir(dirname(VERSION_CACHE_FILE), 0755, true);
   file_put_contents(VERSION_CACHE_FILE, $json_version_string); 
 }
@@ -106,7 +109,7 @@ foreach (new RecursiveIteratorIterator($di, RecursiveIteratorIterator::SELF_FIRS
                   $headers = "From: \"CMI Serverbeheer\" <cmi-beheer@hr.nl>\r\n";
                   $headers.= "Cc: \"CMI Serverbeheer\" <cmi-beheer@hr.nl>\r\n";
                   $message = "Wij hebben een verouderde versie van Wordpress op je CMI webspace gevonden. Deze oude versies zijn erg onveilig voor het netwerk en kunnen misbruikt worden door hackers; dit kan grote consequenties hebben voor de Hogeschool Rotterdam.\r\n\r\nBij deze wordt je dan ook verzocht de Wordpress site te updaten naar de laatste versie. De nieuwste versies van Wordpress bieden ook een \"auto-update\" optie, waardoor je hierna altijd de laatste en veilige versie van Wordpress zal draaien.\r\n\r\nDe Wordpress site is vanaf nu van buiten het netwerk van Hogeschool Rotterdam niet meer te bereiken doordat we een bestand genaamd \"blocked_please_update_wordpress\" in je webspace hebben gezet. Als je de Wordpress site wilt updaten moet je eerst dat bestand via SFTP of SSH toegang verwijderen en daarna kun je Wordpress normaal updaten.\r\n\r\n\r\n\r\nWe have found an old version of Wordpress in your CMI webspace. These old versions are very unsecure and pose a threat to the network of Rotterdam University as they can be abused by hackers; this can have major consequences for Rotterdam University.\r\n\r\nWe urge you to update your Wordpress site as soon as possible to the latest version. The latest versions of Wordpress offer an \"auto-update\" option, this option makes sure that you will always run the latest and secure version of Wordpress.\r\n\r\Your outdated Wordpress site is now blocked from outsite the University network because we have placed a \"blocked_please_update_wordpress\" file in your webspace. If you want to update your Wordpress site you first have to delete that file through SFTP or SSH access and after that you can update Wordpress normally.\r\n\r\n\r\n\r\nUsername: $wp_owner\r\nWordpress directory: $wp_basedir\r\nInstalled version: $wp_version\r\n\r\nThe latest available version of Wordpress can be downloaded from http://wordpress.org";
-                  #mail($mail_to, "Oude Wordpress site / Old Wordpress site", $message, $headers);
+                  mail($mail_to, "Oude Wordpress site / Old Wordpress site", $message, $headers);
                   if (VERBOSE) print("  Action:  blocked and mail sent to $mail_to\n");
                 } else {
                   if (VERBOSE) print("  Action:  blocked, but no mail sent\n");
@@ -116,7 +119,9 @@ foreach (new RecursiveIteratorIterator($di, RecursiveIteratorIterator::SELF_FIRS
               }
               if (VERBOSE) print("------------------------------------------------------------------------------\n");
             } else {
+              // Acceptable version detected
               if (is_file($htaccess_file)) {
+                // Unblock the site, apparantly it has been updated
                 unlink($htaccess_file);
                 if (VERBOSE) print("Unblocked: $wp_basedir ($wp_version)\n");
                 if (VERBOSE) print("------------------------------------------------------------------------------\n");
