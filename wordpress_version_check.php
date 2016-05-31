@@ -63,12 +63,20 @@ function get_versions_from_json($json_version_string) {
 $json_version_string = file_get_contents("https://api.wordpress.org/core/version-check/1.7/");
 $wp_current_versions = get_versions_from_json($json_version_string);
 
-if (is_file(VERSION_CACHE_FILE) && filemtime(VERSION_CACHE_FILE) > (time() - (7 * 24 * 60 * 60))) {
-  // Version cache file is current, also get the (previous) versions from there
+$version_hash_current = md5($json_version_string);
+$version_hash_cache = "";
+
+if (is_file(VERSION_CACHE_FILE)) {
+  // Read versions from cache file
   $json_version_string = file_get_contents(VERSION_CACHE_FILE);
+  $version_hash_cache = md5($json_version_string);
   $wp_current_versions = array_merge($wp_current_versions, get_versions_from_json($json_version_string));
-} else {
-  // Version cache file is outdated, update it with the current versions from wordpress.org
+}
+
+if (($version_hash_current != $version_hash_cache) && // New versions have been released AND
+    ((is_file(VERSION_CACHE_FILE) && filemtime(VERSION_CACHE_FILE) < (time() - (7 * 24 * 60 * 60)) || // the cache file exists and is older than 7 days OR
+     !is_file(VERSION_CACHE_FILE)))) { // there is no cache file
+  // Then update the cache file with the current versions from wordpress.org
   if (!is_dir(dirname(VERSION_CACHE_FILE))) mkdir(dirname(VERSION_CACHE_FILE), 0755, true);
   file_put_contents(VERSION_CACHE_FILE, $json_version_string); 
 }
