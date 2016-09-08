@@ -79,6 +79,8 @@ if (($version_hash_current != $version_hash_cache) && // New versions have been 
   // Then update the cache file with the current versions from wordpress.org
   if (!is_dir(dirname(VERSION_CACHE_FILE))) mkdir(dirname(VERSION_CACHE_FILE), 0755, true);
   file_put_contents(VERSION_CACHE_FILE, $json_version_string); 
+  mail("cmi-beheer@hr.nl", "Wordpress Version Check - Versions Updated", "The latest version file has been updated, you might want to check it.");
+  exit(0); // Give it one more day
 }
 $wp_current_versions = array_unique($wp_current_versions);
 
