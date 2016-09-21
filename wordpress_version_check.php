@@ -81,11 +81,12 @@ if (($version_hash_current != $version_hash_cache) && // New versions have been 
   file_put_contents(VERSION_CACHE_FILE, $json_version_string_current); 
 }
 
-if (filemtime(VERSION_CACHE_FILE) < (time() - (24 * 60 * 60))) {
+$wp_current_versions = array_unique($wp_current_versions);
+
+if (filemtime(VERSION_CACHE_FILE) > (time() - (24 * 60 * 60))) {
   mail("cmi-beheer@hr.nl", "Wordpress Version Check - Versions Updated", "The latest version file has been updated, you might want to check it:\n" . var_dump($wp_current_versions));
   exit(0); // Give it one more day
 }
-$wp_current_versions = array_unique($wp_current_versions);
 
 if (VERBOSE) print("Outdated Wordpress sites:\n");
 if (VERBOSE) print("------------------------------------------------------------------------------\n");
