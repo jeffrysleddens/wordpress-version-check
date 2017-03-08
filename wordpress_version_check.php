@@ -83,8 +83,8 @@ if (is_file(VERSION_CACHE_FILE)) {
 }
 
 if (($version_hash_current != $version_hash_cache) && // New versions have been released AND
-    ((is_file(VERSION_CACHE_FILE) && filemtime(VERSION_CACHE_FILE) < (time() - (7 * 24 * 60 * 60)) || // the cache file exists and is older than 7 days OR
-     !is_file(VERSION_CACHE_FILE)))) { // there is no cache file
+    ((is_file(VERSION_CACHE_FILE) && filemtime(VERSION_CACHE_FILE) < (time() - (7 * 24 * 60 * 60))) || // the cache file exists and is older than 7 days OR
+     !is_file(VERSION_CACHE_FILE))) { // there is no cache file
   // Then update the cache file with the current versions from wordpress.org
   if (!is_dir(dirname(VERSION_CACHE_FILE))) mkdir(dirname(VERSION_CACHE_FILE), 0755, true);
   file_put_contents(VERSION_CACHE_FILE, $json_version_string_current); 
