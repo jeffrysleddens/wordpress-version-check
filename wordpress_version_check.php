@@ -93,7 +93,7 @@ if (($version_hash_current != $version_hash_cache) && // New versions have been 
 $wp_current_versions = array_unique($wp_current_versions);
 
 if (filemtime(VERSION_CACHE_FILE) > (time() - (24 * 60 * 60))) {
-  mail("cmi-beheer@hr.nl", "Wordpress Version Check - Versions Updated", "The latest version file has been updated, you might want to check it:\n" . print_r($wp_current_versions, true));
+  mail("cmi-beheer@hr.nl", "Wordpress Version Check - Versions Updated", "The latest version file has been updated, you might want to check it:\n" . print_r($wp_current_versions, true) . "\n\n" . file_get_contents(VERSION_CACHE_FILE) . "\n\n" . VERSION_CACHE_FILE . " mod time: " . filemtime(VERSION_CACHE_FILE) . "\n");
   exit(0); // Give it one more day
 }
 
