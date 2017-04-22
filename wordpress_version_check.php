@@ -94,7 +94,9 @@ $wp_current_versions = array_unique($wp_current_versions);
 
 if (filemtime(VERSION_CACHE_FILE) > (time() - (24 * 60 * 60))) {
   mail("cmi-beheer@hr.nl", "Wordpress Version Check - Versions Updated", "The latest version file has been updated, you might want to check it:\n" . print_r($wp_current_versions, true) . "\n\n" . file_get_contents(VERSION_CACHE_FILE) . "\n\n" . VERSION_CACHE_FILE . " mod time: " . filemtime(VERSION_CACHE_FILE) . "\n");
-  exit(0); // Give it one more day
+  exit(0); // New cache file, notify admins
+} elseif (filemtime(VERSION_CACHE_FILE) > (time() - (4 * 24 * 60 * 60))) {
+  exit(0); // Wait 4 days so sites have had the chance to autoupdate
 }
 
 if (VERBOSE) print("Outdated Wordpress sites:\n");
